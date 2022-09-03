@@ -180,3 +180,5 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+data/second_capture/processed/.Rhistory
+data/second_capture/processed/.RData
