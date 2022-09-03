@@ -77,11 +77,12 @@ notype <- scale(train[,1:11])
 
 X11()
 boxplot(notype, col = 'yellow')
-
+pdf(file="~/plot.pdf", width = 15, height = 15)
+dev.off()
 # We compute the principal components and also the scores
 pc <- princomp(notype, scores = T)
 summary(pc)
-
+pdf()
 X11()
 pairs(pc$scores[,1:3], col=train$type_of_traffic, pch = 19)
 legend("topright", fill = unique(train$type_of_traffic), legend = c(levels(train$type_of_traffic)))
@@ -111,6 +112,7 @@ test_scaled <- scale(test_traffic[,1:11], attr(notype, "scaled:center"), attr(no
 traffic.knn <- knn(train = notype, test = test_scaled, cl = train$type_of_traffic, k = 4)
 traffic.knn
 
+
 # Confusion table 
 table(class.true = test_traffic$type_of_traffic, class.assigned=traffic.knn)
 
@@ -135,3 +137,4 @@ z  <- as.numeric(contour.knn)
 contour(pc1, pc2, matrix(z, 300), levels=c(1.5, 2.5), drawlabels=F, add=T)
 
 graphics.off()
+dev.off()
