@@ -5,10 +5,10 @@ library(MASS)
 library(class)
 library(e1071)
 
-setwd("~/Documents/wireless_project/second_capture/processed")
+setwd("~/Documents/GitHub/wifi-traffic-localization/data/second_capture/processed")
 
-#browsing <- read.csv("processed_browsing.csv", stringsAsFactors = T)
-#idle <- read.csv("processed_idle.csv", stringsAsFactors = T)
+browsing <- read.csv("processed_webbrowsing.csv", stringsAsFactors = T)
+idle <- read.csv("processed_idle.csv", stringsAsFactors = T)
 #instagram <- read.csv("processed_instagram.csv", stringsAsFactors = T)
 #netflix <- read.csv("processed_netflix.csv", stringsAsFactors = T)
 #spotify <- read.csv("processed_spotify.csv", stringsAsFactors = T)
@@ -18,7 +18,7 @@ youtube <- read.csv("processed_youtube.csv", stringsAsFactors = T)
 
 # This is the final dataset
 #dataset <- rbind(browsing, idle, instagram, netflix, spotify, videocall, voip, youtube)
-dataset <- rbind(videocall, voip, youtube)
+dataset <- rbind(videocall, voip, youtube, browsing, idle)
 # We look at the boxplot per column to study the variance
 notype <- dataset[,1:11]
 X11()
@@ -37,7 +37,7 @@ pc <- princomp(notype, scores = T)
 summary(pc)
 
 # Scree plot (plot of explained variance per component)
-
+X11()
 plot(cumsum(pc$sd^2)/sum(pc$sd^2), type='b', axes=F, xlab='number of components', 
      ylab='contribution to the total variance', ylim=c(0,1))
 abline(h=1, col='blue')
@@ -99,35 +99,39 @@ for(k in 2:50) {
       errors[k-1] <- errors[k-1] + 1 
   }
 }
+errors
 min(errors)
 
-# The minimum test error (via LOO) is 3 and we can choose from k in (2,3,4,5). Intuition tells us 5 is a reasonable parameter
+# The minimum test error (via LOO) is 6.
 
 # We scale testing dataset
 test_scaled <- scale(test_traffic[,1:11], attr(notype, "scaled:center"), attr(notype, "scaled:scale"))
 
 # We "train" KNN
-traffic.knn <- knn(train = notype, test = test_scaled, cl = train$type_of_traffic, k = 5)
+traffic.knn <- knn(train = notype, test = test_scaled, cl = train$type_of_traffic, k = 4)
 traffic.knn
 
 # Confusion table 
-table(class.true = test$type_of_traffic, class.assigned=traffic.knn)
+table(class.true = test_traffic$type_of_traffic, class.assigned=traffic.knn)
 
 
 # Now we plot the classification regions, we use the first 3 PCs
 
 x11()
 plot(pc$scores[,1:2], main='Traffic', pch=19, col = train$type_of_traffic)
-
 legend("topright", fill = unique(train$type_of_traffic), legend = c(levels(train$type_of_traffic)))
+scores_1_3 <- pc$scores[,1:3]
 
-x  <- seq(min(pc$scores[,1]), max(pc$scores[,1]), length=300)
-y  <- seq(min(pc$scores[,2]), max(pc$scores[,2]), length=300)
-xy <- expand.grid(xcoord=x, ycoord=y)
+pc1  <- seq(min(scores_1_3[,1]), max(scores_1_3[,1]), length=300)
+pc2  <- seq(min(scores_1_3[,2]), max(scores_1_3[,2]), length=300)
+#pc3  <- seq(min(scores_1_3[,3]), max(scores_1_3[,3]), length=300)
 
-debris.knn <- knn(train = debris[,1:2], test = xy, cl = debris[,3], k = 21)
-z  <- as.numeric(debris.knn)
+#xyz <- expand.grid(xcoord=pc1, ycoord=pc2, zcoord=pc3)
+xy <- expand.grid(x = pc1, y = pc2)
+contour.knn <- knn(train = scores_1_3[,1:2], test = xy, cl = train$type_of_traffic, k = 4)
+z  <- as.numeric(contour.knn)
 
-contour(x, y, matrix(z, 300), levels=c(1.5, 2.5), drawlabels=F, add=T)
+
+contour(pc1, pc2, matrix(z, 300), levels=c(1.5, 2.5), drawlabels=F, add=T)
 
 graphics.off()
