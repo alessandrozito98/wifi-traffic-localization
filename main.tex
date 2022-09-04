@@ -1,0 +1,146 @@
+\documentclass[11pt, USenglish]{article}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs,caption}
+\usepackage{tabularx,booktabs}
+\usepackage[flushleft]{threeparttable}
+\usepackage[rightcaption]{sidecap}
+\usepackage{wrapfig}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{bbm}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{vmargin}
+\usepackage[title]{appendix}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{natbib}
+\usepackage{tabularx}
+\usepackage{lastpage}
+\usepackage{comment}
+%\usepackage{floatrow}
+\usepackage{pgfplots}
+\usepackage{emptypage}
+\usepackage{lipsum}
+\renewenvironment{abstract}
+{\quotation\small\noindent\rule{\linewidth}{.5pt}\par\smallskip
+{\centering\bfseries\abstractname\par}\medskip}
+{\par\noindent\rule{\linewidth}{.5pt}\endquotation}
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords:}} #1}
+\DeclareCaptionFormat{citation}{%
+\ifx\captioncitation\relax\relax\else
+\captioncitation\par
+\fi
+#1#2#3\par}
+\newcommand*\setcaptioncitation[1]{\def\captioncitation{\textit{Source:}~#1}}
+\let\captioncitation\relax
+\captionsetup{format=citation,justification=centering}
+\setpapersize{A4}
+\setmargins{2.5cm}           % margen izquierdo
+{1.5cm}                      % margen superior
+{16.5cm}                     % anchura del texto
+{23.42cm}                    % altura del texto
+{10pt}                       % altura de los encabezados
+{1cm}                        % espacio entre el texto y los encabezados
+{0pt}                        % altura del pie de página
+{2cm}                        % espacio entre el texto y el pie de página
+
+\renewcommand{\baselinestretch}{1.5}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} 
+\lhead{Wi-Fi encrypted traffic classification \hfill September 2022}
+\usepackage{hyperref}
+\rfoot{Page \thepage \hspace{1pt} of \pageref{LastPage}}
+\usepackage{cleveref}
+\setlength{\footnotesep}{\baselineskip}
+\hypersetup{
+colorlinks=true,
+linkcolor=black,
+filecolor=magenta, 
+citecolor=blue,
+urlcolor=cyan,
+}
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+\usepackage[utf8]{inputenc}
+
+\title{Wi-Fi encrypted traffic classification}
+\author{Alessandro Zito, Carlos Santillan}
+\date{August 2022}
+
+
+
+\begin{document}
+
+\maketitle
+% Insert the title, author and date
+\begin{center}
+\begin{tabular}{l r}
+ID number: & 890219 - \\ % Partner names
+Personal code: & 10617579 - 10659783\\
+Supervisor: & Alessandro Enrico Cesare Redondi % Instructor/supervisor
+\end{tabular}
+\end{center}
+
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+
+\section{Introduction}
+The goal of this project is to implement a Machine Learning classifier that can distinguish different types of traffic that a user performed by sniffing traffic in monitor mode. Monitor mode means that all the traffic that the Network Interface Card (NIC) can receive is captured, regardless of the destination. 
+
+\section{Sniffing and dataset building}
+
+\subsection{Sniffing}
+Sniffing and capturing the packets was the first step to build our dataset: the main problem was to capture it without using port numbers, IP addresses and anything that goes beyond 802.11, cause the traffic in monitor mode is encrypted.
+First of all we took the MAC address of the target device. Then with the help of \textit{airmong-ng} to put the NIC in monitor mode and using Wireshark as our packet sniffer software, we captured 20 minutes of each traffic type that we wanted to analyze, filtering packets destination and source with the MAC address chosen before.
+
+\subsection{Dataset Building}
+After sniffing the packets, we had a several .pcap files. In order to be able to analyze, we have to convert them 
+
+The sniffing phase produced several .pcap files that required processing. In order to convert the capture files into a dataset ready for classification we had to extract meaningful features. We consider traffic flows lasting $W$ seconds and computed:
+
+\begin{itemize}
+    \item Mean packet length
+    \item Variance of packet length
+    \item Mean inter-arrival time
+    \item Variance of inter-arrival time
+    \item Maximum and minimum packet length
+    \item Number of packets of type: QoS Data, QoS Null function, Other
+    \item Number of packets sent and received
+\end{itemize}
+
+The choice of the parameter $W$ was based on the ability to distinguish the traffic type in that amount of time. Starting from 5 seconds we chose 15 seconds since it yielded better results. So we processed the data to obtain the features and produced a dataset containing 477 rows.
+
+
+\section{Data Exploration}
+We briefly looked at the variance of the features and noticed a significant unbalance %METTI FIGURA%
+that we addressed by normalizing the data. Since we had 11 features we performed principal component analysis to assess qualitatively the difference between the types of traffic. We kept the first 3 principal components (over 80\% of variability explained) and plotted them against each other. %Figure 2% 
+shows the pairs plot and we can see a pattern if we color the dataset by traffic type, they tend to appear in well defined clusters. With this information we proceeded to train a classifier using the original 11 features.
+
+
+\section{Classification and results}
+There were many options, ranging from KNN to Logistic Regression and Support Vector Machines. Since KNN didn't require any assumptions on normality and our data was well separated from the beginning, we selected it as our Machine Learning classifier. KNN classifies each sample based on its immediate neighbours so, for example, if my K-nearest neighbours are of type A, then i will be classified as A, or whatever the majority of my neighbours' type is. We used the Euclidean distance as distance between the samples. We divided our dataset into training and test set (65\% and 35\% respectively) and in order to choose the hyper-parameter K, we performed leave-one-out cross validation on the training set and the best K founded was 4. So we tested the classifier against the test set and obtained an error rate of 7\%.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics{}
+    \caption{Caption}
+    \label{fig:my_label}
+\end{figure}
+
+\section{Conclusion}
+We believe that our work is coherent with the beginning requests; we consider the error rate output to be acceptable for this type of project. It may proof useful in monitoring network usage in order to know which type of traffic are using and improving the network resource allocation. 
+
+\end{document}
