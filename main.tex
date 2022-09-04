@@ -18,14 +18,18 @@
 \usepackage{float}
 \usepackage{listings}
 \usepackage{caption}
-\usepackage{natbib}
+\usepackage[square, numbers]{natbib}
 \usepackage{tabularx}
 \usepackage{lastpage}
 \usepackage{comment}
+\usepackage{hyperref}
+\hypersetup{nolinks=true}
 %\usepackage{floatrow}
 \usepackage{pgfplots}
 \usepackage{emptypage}
 \usepackage{lipsum}
+\bibliographystyle{abbrvnat}
+\usepackage[nottoc]{tocbibind}
 \renewenvironment{abstract}
 {\quotation\small\noindent\rule{\linewidth}{.5pt}\par\smallskip
 {\centering\bfseries\abstractname\par}\medskip}
@@ -104,7 +108,7 @@ The goal of this project is to implement a Machine Learning classifier that can 
 
 \subsection{Sniffing}
 Sniffing and capturing the packets was the first step to build our dataset: the main problem was to capture it without using port numbers, IP addresses and anything that goes beyond 802.11, cause the traffic in monitor mode is encrypted.
-First of all we took the MAC address of the target device. Then with the help of \textit{airmong-ng} to put the NIC in monitor mode and using Wireshark as our packet sniffer software, we captured 20 minutes of each traffic type that we wanted to analyze, filtering packets destination and source with the MAC address chosen before.
+First of all we took the MAC address of the target device. Then with the help of \textit{airmong-ng} \cite{airmonng} to put the NIC in monitor mode and using Wireshark as our packet sniffer software, we captured 20 minutes of each traffic type that we wanted to analyze, filtering packets destination and source with the MAC address chosen before.
 
 \subsection{Dataset Building}
 After sniffing the packets, we had a several .pcap files. In order to be able to analyze, we have to convert them 
@@ -132,15 +136,11 @@ shows the pairs plot and we can see a pattern if we color the dataset by traffic
 
 \section{Classification and results}
 There were many options, ranging from KNN to Logistic Regression and Support Vector Machines. Since KNN didn't require any assumptions on normality and our data was well separated from the beginning, we selected it as our Machine Learning classifier. KNN classifies each sample based on its immediate neighbours so, for example, if my K-nearest neighbours are of type A, then i will be classified as A, or whatever the majority of my neighbours' type is. We used the Euclidean distance as distance between the samples. We divided our dataset into training and test set (65\% and 35\% respectively) and in order to choose the hyper-parameter K, we performed leave-one-out cross validation on the training set and the best K founded was 4. So we tested the classifier against the test set and obtained an error rate of 7\%.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics{}
-    \caption{Caption}
-    \label{fig:my_label}
-\end{figure}
+%%Metti figura
 
 \section{Conclusion}
 We believe that our work is coherent with the beginning requests; we consider the error rate output to be acceptable for this type of project. It may proof useful in monitoring network usage in order to know which type of traffic are using and improving the network resource allocation. 
 
+\newpage
+\bibliography{bibliography}
 \end{document}
