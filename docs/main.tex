@@ -102,18 +102,22 @@ Supervisor: & Alessandro Enrico Cesare Redondi % Instructor/supervisor
 
 
 \section{Introduction}
-The goal of this project is to implement a Machine Learning classifier that can distinguish different types of traffic that a user performed by sniffing traffic in monitor mode. Monitor mode means that all the traffic that the Network Interface Card (NIC) can receive is captured, regardless of the destination. 
+The goal of this project is to implement a Machine Learning classifier that can distinguish different types of traffic that a user performed by sniffing traffic in monitor mode. Monitor mode means that all the traffic that the Network Interface Card (NIC) can receive is captured, regardless of the destination.
 
 \section{Sniffing and dataset building}
 
 \subsection{Sniffing}
-Sniffing and capturing the packets was the first step to build our dataset: the main problem was to capture it without using port numbers, IP addresses and anything that goes beyond 802.11, cause the traffic in monitor mode is encrypted.
-First of all we took the MAC address of the target device. Then with the help of \textit{airmong-ng} \cite{airmonng} to put the NIC in monitor mode and using Wireshark as our packet sniffer software, we captured 20 minutes of each traffic type that we wanted to analyze, filtering packets destination and source with the MAC address chosen before.
+Sniffing and capturing the packets was the first step to building our dataset: the main problem was to
+capture it without using port numbers, IP addresses, and anything that goes beyond 802.11, cause
+the traffic in monitor mode is encrypted. First of all, we took the MAC address of the target device.
+Then with the help of \textit{airmong-ng} \cite{airmonng} to put the NIC in monitor mode and using Wireshark as our packet sniffer software, we captured 20 minutes of each traffic type that we wanted to analyze, filtering packets destination and source with the MAC address chosen before
 
 \subsection{Dataset Building}
-After sniffing the packets, we had a several .pcap files. In order to be able to analyze, we have to convert them 
+After sniffing the packets, we had several .pcap files. To be able to analyze, we have to
+convert them The sniffing phase produced several .pcap files that required processing. To convert
+the capture files into a dataset ready for classification we had to extract meaningful features. We
+consider traffic flows lasting W seconds and computed:
 
-The sniffing phase produced several .pcap files that required processing. In order to convert the capture files into a dataset ready for classification we had to extract meaningful features. We consider traffic flows lasting $W$ seconds and computed:
 
 \begin{itemize}
     \item Mean packet length
@@ -123,23 +127,39 @@ The sniffing phase produced several .pcap files that required processing. In ord
     \item Maximum and minimum packet length
     \item Number of packets of type: QoS Data, QoS Null function, Other
     \item Number of packets sent and received
+
 \end{itemize}
 
-The choice of the parameter $W$ was based on the ability to distinguish the traffic type in that amount of time. Starting from 5 seconds we chose 15 seconds since it yielded better results. So we processed the data to obtain the features and produced a dataset containing 477 rows.
+The choice of the parameter $W$ was based on the ability to distinguish the traffic type in that
+amount of time. Starting from 5 seconds we chose 15 seconds since it yielded better results. So we
+processed the data to obtain the features and produced a dataset containing 477 rows
 
 
 \section{Data Exploration}
-We briefly looked at the variance of the features and noticed a significant unbalance %METTI FIGURA%
-that we addressed by normalizing the data. Since we had 11 features we performed principal component analysis to assess qualitatively the difference between the types of traffic. We kept the first 3 principal components (over 80\% of variability explained) and plotted them against each other. %Figure 2% 
-shows the pairs plot and we can see a pattern if we color the dataset by traffic type, they tend to appear in well defined clusters. With this information we proceeded to train a classifier using the original 11 features.
+We briefly looked at the variance of the features and noticed a significant unbalance %%METTI FIGURA
+that we addressed by normalizing the data. Since we had 11 features we performed principal component
+analysis to assess qualitatively the difference between the types of traffic. We kept the first 3
+principal components (over 80\% of variability explained) and plotted against each other. %%FIGURE 2
+shows the pairs plot and we can see a pattern if we color the dataset by traffic type, they tend to
+appear in well-defined clusters. With this information, we proceeded to train a classifier using the
+original 11 features.
 
 
 \section{Classification and results}
-There were many options, ranging from KNN to Logistic Regression and Support Vector Machines. Since KNN didn't require any assumptions on normality and our data was well separated from the beginning, we selected it as our Machine Learning classifier. KNN classifies each sample based on its immediate neighbours so, for example, if my K-nearest neighbours are of type A, then i will be classified as A, or whatever the majority of my neighbours' type is. We used the Euclidean distance as distance between the samples. We divided our dataset into training and test set (65\% and 35\% respectively) and in order to choose the hyper-parameter K, we performed leave-one-out cross validation on the training set and the best K founded was 4. So we tested the classifier against the test set and obtained an error rate of 7\%.
+There were many options, ranging from KNN to Logistic Regression and Support Vector Machines.
+Since KNN didn’t require any assumptions on normality and our data was well separated from the
+beginning, we selected it as our Machine Learning classifier. KNN classifies each sample based on
+its immediate neighbors so, for example, if my K-nearest neighbors are of type A, then I will
+be classified as A, or whatever the majority of my neighbors’ type is. We used the Euclidean
+distance as the distance between the samples. We divided our dataset into training and test set (65\%
+and 35\% respectively) and to choose the hyper-parameter K, we performed leave-one-out
+cross-validation on the training set and the best K found was 4. So we tested the classifier against
+the test set and obtained an error rate of 7\%
 %%Metti figura
 
 \section{Conclusion}
-We believe that our work is coherent with the beginning requests; we consider the error rate output to be acceptable for this type of project. It may proof useful in monitoring network usage in order to know which type of traffic are using and improving the network resource allocation. 
+We believe that our work is coherent with the beginning requests; we consider the error rate output
+to be acceptable for this type of project. It may prove useful in monitoring network usage to know which type of traffic is used and improving the network resource allocation
 
 \newpage
 \bibliography{bibliography}
