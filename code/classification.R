@@ -7,7 +7,7 @@ library(e1071)
 library(dplyr)
 library(ggplot2)
 
-setwd("~/Documents/GitHub/wifi-traffic-localization/data/second_capture/processed")
+setwd("~/Documents/GitHub/wifi-traffic-localization/data/processed")
 
 browsing <- read.csv("processed_webbrowsing.csv", stringsAsFactors = T)
 idle <- read.csv("processed_idle.csv", stringsAsFactors = T)

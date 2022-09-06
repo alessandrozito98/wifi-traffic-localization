@@ -1,4 +1,4 @@
-setwd("~/Documents/wireless_project/second_capture")
+setwd("~/Documents/GitHub/wifi-traffic-localization/data/raw_csv")
 
 traffic <- read.csv("videocall.csv", stringsAsFactors = T)
 # Filter non-802.11 packets
