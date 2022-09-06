@@ -1,18 +1,17 @@
 \documentclass[11pt, USenglish]{article}
 \usepackage{graphicx}
-\usepackage{subfigure}
 \usepackage{booktabs,caption}
 \usepackage{tabularx,booktabs}
 \usepackage[flushleft]{threeparttable}
 \usepackage[rightcaption]{sidecap}
 \usepackage{wrapfig}
+\usepackage{subcaption}
 \usepackage[utf8]{inputenc}
 \usepackage{setspace}
 \usepackage{multirow}
 \usepackage{amsmath}
 \usepackage{bbm}
 \usepackage{caption}
-\usepackage{subcaption}
 \usepackage{vmargin}
 \usepackage[title]{appendix}
 \usepackage{float}
@@ -23,7 +22,6 @@
 \usepackage{lastpage}
 \usepackage{comment}
 \usepackage{hyperref}
-\hypersetup{nolinks=true}
 %\usepackage{floatrow}
 \usepackage{pgfplots}
 \usepackage{emptypage}
@@ -44,14 +42,14 @@
 \let\captioncitation\relax
 \captionsetup{format=citation,justification=centering}
 \setpapersize{A4}
-\setmargins{2.5cm}           % margen izquierdo
-{1.5cm}                      % margen superior
-{16.5cm}                     % anchura del texto
-{23.42cm}                    % altura del texto
-{10pt}                       % altura de los encabezados
-{1cm}                        % espacio entre el texto y los encabezados
-{0pt}                        % altura del pie de página
-{2cm}                        % espacio entre el texto y el pie de página
+\setmargins{2.5cm}      
+{1.5cm}               
+{16.5cm}               
+{23.42cm}        
+{10pt}             
+{1cm}                      
+{0pt}                   
+{2cm}                        
 
 \renewcommand{\baselinestretch}{1.5}
 \usepackage{fancyhdr}
@@ -75,9 +73,9 @@ urlcolor=cyan,
 \graphicspath{ {./images/} }
 \usepackage[utf8]{inputenc}
 
-\title{Wi-Fi encrypted traffic classification}
-\author{Alessandro Zito, Carlos Santillan}
-\date{August 2022}
+\title{Wi-Fi Encrypted Traffic Classification}
+\author{Alessandro Zito, Carlos Santillán}
+\date{September 6th 2022}
 
 
 
@@ -87,9 +85,10 @@ urlcolor=cyan,
 % Insert the title, author and date
 \begin{center}
 \begin{tabular}{l r}
-ID number: & 890219 - \\ % Partner names
+ID number: & 890219 - 102516\\ % Partner names
 Personal code: & 10617579 - 10659783\\
-Supervisor: & Alessandro Enrico Cesare Redondi % Instructor/supervisor
+Supervisor: & Alessandro Enrico Cesare Redondi \\% Instructor/supervisor
+Course: & Wireless Internet
 \end{tabular}
 \end{center}
 
@@ -102,65 +101,101 @@ Supervisor: & Alessandro Enrico Cesare Redondi % Instructor/supervisor
 
 
 \section{Introduction}
-The goal of this project is to implement a Machine Learning classifier that can distinguish different types of traffic that a user performed by sniffing traffic in monitor mode. Monitor mode means that all the traffic that the Network Interface Card (NIC) can receive is captured, regardless of the destination.
+This project aims to implement a classification algorithm in the context of Wi-Fi traffic. The classification problem in this context may aid in making more informed decisions in network resource allocation or when performing diagnostics.
 
-\section{Sniffing and dataset building}
+The presented pipeline starts with sniffing encrypted Wi-Fi traffic in monitor mode, the subsequent construction of a traffic dataset, and the training of a classifier to distinguish different types of traffic. Finally, we will focus on a single known device, but the procedure can be generalized to many devices contemporaneously. Data analysis was performed with R.
+
+\section{Sniffing and Dataset Building}
 
 \subsection{Sniffing}
-Sniffing and capturing the packets was the first step to building our dataset: the main problem was to
-capture it without using port numbers, IP addresses, and anything that goes beyond 802.11, cause
-the traffic in monitor mode is encrypted. First of all, we took the MAC address of the target device.
-Then with the help of \textit{airmong-ng} \cite{airmonng} to put the NIC in monitor mode and using Wireshark as our packet sniffer software, we captured 20 minutes of each traffic type that we wanted to analyze, filtering packets destination and source with the MAC address chosen before
+
+
+The first step in building the dataset is to capture Wi-Fi traffic. We decided to distinguish between five types of traffic:
+\begin{itemize}
+	\itemsep-0.3em 
+	\item Idle device
+	\item Web browsing
+	\item VoIP calls 
+	\item Video calls 
+	\item Youtube streaming
+\end{itemize}
+We captured (in \textit{monitor mode}) approximately 20 minutes of traffic per type (via Wireshark) and stored them in .pcap files. We filtered traffic sent from and received by the target device\footnote{MAC address A4:42:3B:D2:F7:08}. Since the traffic is encrypted, we cannot rely on port numbers, IP addresses, etc., for the purposes of classification. Instead, we had to work exclusively with statistical features.
 
 \subsection{Dataset Building}
-After sniffing the packets, we had several .pcap files. To be able to analyze, we have to
-convert them The sniffing phase produced several .pcap files that required processing. To convert
-the capture files into a dataset ready for classification we had to extract meaningful features. We
-consider traffic flows lasting W seconds and computed:
 
+Each entry in our dataset consists of a traffic flow lasting $W$ seconds. This required some preprocessing on the original data. For each traffic flow, which includes all packets sent and received by the target device in the interval $[t, \,t + W)$, we extracted the following statistical features:
 
 \begin{itemize}
-    \item Mean packet length
-    \item Variance of packet length
-    \item Mean inter-arrival time
-    \item Variance of inter-arrival time
-    \item Maximum and minimum packet length
-    \item Number of packets of type: QoS Data, QoS Null function, Other
-    \item Number of packets sent and received
-
+	\itemsep-0.3em 
+	\item Mean and variance of packet length
+	\item Mean and variance of inter-arrival time
+	\item Maximum and minimum packet length
+	\item Number of packets of type: QoS Data, QoS Null function, Other
+	\item Number of sent and received packets
 \end{itemize}
 
-The choice of the parameter $W$ was based on the ability to distinguish the traffic type in that
-amount of time. Starting from 5 seconds we chose 15 seconds since it yielded better results. So we
-processed the data to obtain the features and produced a dataset containing 477 rows
+
+The choice of the parameter $W$ was based on the ability to distinguish the traffic types in that time frame significantly. Starting from 5 seconds and increasing, we finally chose 15 seconds since it met our criteria. So we processed the data to obtain the features and produced a dataset containing 477 rows.
 
 
 \section{Data Exploration}
-We briefly looked at the variance of the features and noticed a significant unbalance %%METTI FIGURA
-that we addressed by normalizing the data. Since we had 11 features we performed principal component
-analysis to assess qualitatively the difference between the types of traffic. We kept the first 3
-principal components (over 80\% of variability explained) and plotted against each other. %%FIGURE 2
-shows the pairs plot and we can see a pattern if we color the dataset by traffic type, they tend to
-appear in well-defined clusters. With this information, we proceeded to train a classifier using the
-original 11 features.
 
+We looked at the variance of the features and noticed a significant unbalance (see Figure 1) that we addressed by normalizing the data (see Figure 2). 
+
+\begin{figure}
+	\begin{minipage}[c]{0.4\linewidth}
+		\includegraphics[width=\linewidth]{boxplot.png}
+		\caption{Boxplot of original features, variance of packet length creates an unbalance}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[c]{0.4\linewidth}
+		\includegraphics[width=\linewidth]{boxplot2.png}
+		\caption{Boxplot of normalized features, our classifier will no longer be biased towards one feature}
+	\end{minipage}%
+\end{figure}
+
+
+Because of the high number of features, we performed principal component analysis for visualization purposes. The first three principal components explain over 75\% of the variability. We proceed to assess the separability of the data qualitatively. Figure 3 shows the PC1 v. PC2 plot. Figure 4 shows PC2 v. PC3, which yields similar results.
+\begin{figure}
+\centering
+		\includegraphics[width=140mm, height=90mm,scale=0.5]{pc1pc2.png}
+		\caption{The PC1 vs PC2 plot shows a significant degree of separability}
+\vspace{8mm} 
+	\centering
+	\includegraphics[width=140mm, height=90mm,scale=0.5]{pc2pc3.png}
+	\caption{Confirms a significant degree of separation in the PC2 v. PC3 plane}
+\end{figure}
+
+The plots confirm the presence of well-defined clusters. With this information, we proceed to train the classifier using the original features.
 
 \section{Classification and results}
-There were many options, ranging from KNN to Logistic Regression and Support Vector Machines.
-Since KNN didn’t require any assumptions on normality and our data was well separated from the
-beginning, we selected it as our Machine Learning classifier. KNN classifies each sample based on
-its immediate neighbors so, for example, if my K-nearest neighbors are of type A, then I will
-be classified as A, or whatever the majority of my neighbors’ type is. We used the Euclidean
-distance as the distance between the samples. We divided our dataset into training and test set (65\%
-and 35\% respectively) and to choose the hyper-parameter K, we performed leave-one-out
-cross-validation on the training set and the best K found was 4. So we tested the classifier against
-the test set and obtained an error rate of 7\%
-%%Metti figura
+Many machine learning techniques can tackle this problem: logistic regression, support vector machines, Bayes classifiers, etc. However, we chose $k$-Nearest-Neighbours since the data was well-clustered for it to perform well, and it did not require any strict assumptions on normality and equal variance between clusters. When KNN classifies a new sample, it finds its $k$ nearest neighbors (in the training dataset) and classifies it in the most common class among those neighbors. We used the euclidean distance. We shuffled the data and divided it into a training set (65\%) and a test set (35\%) and tuned the hyper-parameter $k$ via leave-one-out cross-validation. 
+\\\\
+After finding 6 as our optimal $k$, we proceed to compute the test error\footnote{The test set is normalized using the same normalization obtained from the training set.}. We obtain an accuracy of 88.6\%. Figure 5 shows the confusion matrix, and Figure 6 approximates the classification region. We see that web browsing and idle traffic are difficult to distinguish, whereas video calls are much different from the others; therefore, it is easy to classify them correctly.
+\begin{figure}
+	\centering
+	\includegraphics[width=120mm, height=70mm,scale=0.5]{confusion.png}
+	\caption{Confusion matrix of the test set}
+\end{figure}
+\begin{figure}
+	
+	\centering
+	\includegraphics[width=140mm, height=90mm,scale=0.5]{region.png}
+	\caption{An approximation of the classification region using the first two principal components}
+\end{figure}
 
 \section{Conclusion}
-We believe that our work is coherent with the beginning requests; we consider the error rate output
-to be acceptable for this type of project. It may prove useful in monitoring network usage to know which type of traffic is used and improving the network resource allocation
 
+We have reached the goal of classifying traffic with an acceptable level of accuracy. It may be possible to achieve even better results with a further transformation of the original features (use of basis functions) or via kernel functions and support vector machines. In addition, the pipeline can be smoothly adapted into a real-time environment so that we may monitor the state of the network (at least in terms of traffic) and allocate resources accordingly.
 \newpage
-\bibliography{bibliography}
+	\begin{thebibliography}{99} 
+	\bibitem{towards_deployment}
+	Pacheco, Fannia, Ernesto Exposito, Mathieu Gineste, Cedric Baudoin, and Jose Aguilar. "Towards the deployment of machine learning solutions in network traffic classification: A systematic survey." IEEE Communications Surveys \& Tutorials 21, no. 2 (2018): 1988-2014.
+	
+	\bibitem{mla_classification}
+	Li, Wei, and Andrew W. Moore. "A machine learning approach for efficient traffic classification." In 2007 15th International symposium on modeling, analysis, and simulation of computer and telecommunication systems, pp. 310-317. IEEE, 2007.
+  
+\end{thebibliography}
+
+
 \end{document}

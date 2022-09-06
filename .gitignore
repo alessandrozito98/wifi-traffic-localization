@@ -182,3 +182,4 @@ po/*~
 rsconnect/
 data/second_capture/processed/.Rhistory
 data/second_capture/processed/.RData
+data/second_capture/processed/plot.pdf
