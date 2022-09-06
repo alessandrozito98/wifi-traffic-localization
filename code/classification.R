@@ -7,20 +7,18 @@ library(e1071)
 library(dplyr)
 library(ggplot2)
 
-setwd("~/Documents/GitHub/wifi-traffic-localization/data/processed")
+setwd("/path/to/folder") # Insert your folder path
 
 browsing <- read.csv("processed_webbrowsing.csv", stringsAsFactors = T)
 idle <- read.csv("processed_idle.csv", stringsAsFactors = T)
-#instagram <- read.csv("processed_instagram.csv", stringsAsFactors = T)
-#netflix <- read.csv("processed_netflix.csv", stringsAsFactors = T)
-#spotify <- read.csv("processed_spotify.csv", stringsAsFactors = T)
 videocall <- read.csv("processed_videocall.csv", stringsAsFactors = T)
 voip <- read.csv("processed_voip.csv", stringsAsFactors = T)
 youtube <- read.csv("processed_youtube.csv", stringsAsFactors = T)
 
 # This is the final dataset
-#dataset <- rbind(browsing, idle, instagram, netflix, spotify, videocall, voip, youtube)
+
 dataset <- rbind(videocall, voip, youtube, browsing, idle)
+
 # We look at the boxplot per column to study the variance
 notype <- dataset[,1:11]
 X11()
@@ -32,6 +30,7 @@ pdf("~/plot.pdf", width=10,height=7)
 par(mar = c(7, 7, 3, 7))
 boxplot(notype, col = 'yellow', las =2)
 dev.off()
+
 # We standardize the data because of the variance of one of the features
 notype <- scale(notype)
 boxplot(notype, col = 'yellow')
@@ -51,18 +50,15 @@ axis(2,at=0:10/10,labels=0:10/10)
 axis(1,at=1:ncol(dataset),labels=1:ncol(dataset),las=2)
 
 # We try to interpret the first 5 PCs
-
 x11()
 par(mfcol = c(2,2))
 for(i in 1:4) barplot(pc$loadings[,i], ylim = c(-1, 1), main=paste("PC",i), col = "yellow")
 
 # We see that they are mostly weighted means and contrasts between features
-
 X11()
 plot(pc$scores[,2:3], col=dataset$type_of_traffic, pch=19)
 
 # We plot the pairs and color accordingly
-
 X11()
 pairs(pc$scores[,1:3], col=dataset$type_of_traffic, pch = 19)
 legend("topright", fill = unique(dataset$type_of_traffic), legend = c(levels(dataset$type_of_traffic)))
@@ -79,29 +75,24 @@ train <- shuffled[1:(floor(0.65*nrow(shuffled))),]
 test_traffic <- shuffled[(nrow(train) + 1):nrow(shuffled),]
 
 # Normalize training data
-
 notype <- scale(train[,1:11])
 
 # Check variance qualitatively
-
 X11()
 boxplot(notype, col = 'yellow')
 dev.off()
 
 # We compute the principal components and also the scores
-
 pc <- princomp(notype, scores = T)
 summary(pc)
 
 # Simple data visualization and exploration
-
 X11()
 pairs(pc$scores[,1:3], col=train$type_of_traffic, pch = 19)
 legend("topright", fill = unique(train$type_of_traffic), legend = c(levels(train$type_of_traffic)))
 
 
 # Leave-one-out cross validation on training set to choose optimal parameter k
-
 errors <- vector(mode="numeric", length = 49)
 for(k in 2:50) {
   for(i in 1:nrow(notype)) {
@@ -117,24 +108,20 @@ errors
 min(errors)
 
 # The minimum test error (via LOO) is 32 (with our shuffled training set)
-
 # We scale testing dataset, same normalization from the training set
 
 test_scaled <- scale(test_traffic[,1:11], attr(notype, "scaled:center"), attr(notype, "scaled:scale"))
 
 # We "train" KNN
-
 traffic.knn <- knn(train = notype, test = test_scaled, cl = train$type_of_traffic, k = 6)
 traffic.knn
 
 
 # Confusion table 
-
 table(class.true = test_traffic$type_of_traffic, class.assigned=traffic.knn)
 
 
 # Now we plot the classification regions, we use the first 3 PCs
-
 x11()
 plot(pc$scores[,1:2], main='Traffic', pch=19, col = train$type_of_traffic)
 legend("topright", fill = unique(train$type_of_traffic), legend = c(levels(train$type_of_traffic)))
@@ -156,7 +143,6 @@ graphics.off()
 dev.off()
 
 # Define conf_matrix function, plots the multiclass confusion matrix with colors
-
 conf_matrix <- function(df.true, df.pred, title = "", true.lab ="True Class", pred.lab ="Predicted Class",
                         high.col = 'red', low.col = 'white') {
   #convert input vector to factors, and ensure they have the same levels
