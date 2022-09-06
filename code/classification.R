@@ -71,28 +71,37 @@ legend("topright", fill = unique(dataset$type_of_traffic), legend = c(levels(dat
 #################################################################
 #         Training our classifier
 #################################################################
-# Next step -> shuffle data and extract 70% for testing
+
+# Shuffle the data and divide it into training and test set
+
 shuffled <- dataset[sample(1:nrow(dataset)),]
 train <- shuffled[1:(floor(0.65*nrow(shuffled))),]
 test_traffic <- shuffled[(nrow(train) + 1):nrow(shuffled),]
 
 # Normalize training data
+
 notype <- scale(train[,1:11])
+
+# Check variance qualitatively
 
 X11()
 boxplot(notype, col = 'yellow')
-pdf(file="~/plot.pdf", width = 15, height = 15)
 dev.off()
+
 # We compute the principal components and also the scores
+
 pc <- princomp(notype, scores = T)
 summary(pc)
+
+# Simple data visualization and exploration
 
 X11()
 pairs(pc$scores[,1:3], col=train$type_of_traffic, pch = 19)
 legend("topright", fill = unique(train$type_of_traffic), legend = c(levels(train$type_of_traffic)))
 
 
-# Leave-one-out cross validation on training set to choose optimal parameter
+# Leave-one-out cross validation on training set to choose optimal parameter k
+
 errors <- vector(mode="numeric", length = 49)
 for(k in 2:50) {
   for(i in 1:nrow(notype)) {
@@ -107,17 +116,20 @@ for(k in 2:50) {
 errors
 min(errors)
 
-# The minimum test error (via LOO) is 6.
+# The minimum test error (via LOO) is 32 (with our shuffled training set)
 
-# We scale testing dataset
+# We scale testing dataset, same normalization from the training set
+
 test_scaled <- scale(test_traffic[,1:11], attr(notype, "scaled:center"), attr(notype, "scaled:scale"))
 
 # We "train" KNN
+
 traffic.knn <- knn(train = notype, test = test_scaled, cl = train$type_of_traffic, k = 6)
 traffic.knn
 
 
 # Confusion table 
+
 table(class.true = test_traffic$type_of_traffic, class.assigned=traffic.knn)
 
 
@@ -143,13 +155,7 @@ contour(pc1, pc2, matrix(z, 300), levels=c(1.5, 2.5), drawlabels=F, add=T)
 graphics.off()
 dev.off()
 
-
-
-confusion <- data.frame(true = test_traffic$type_of_traffic,
-                     predicted = traffic.knn)
-X11()
-
-conf_matrix(confusion$true, confusion$predicted, title = "Conf. Matrix Example")
+# Define conf_matrix function, plots the multiclass confusion matrix with colors
 
 conf_matrix <- function(df.true, df.pred, title = "", true.lab ="True Class", pred.lab ="Predicted Class",
                         high.col = 'red', low.col = 'white') {
@@ -194,3 +200,10 @@ conf_matrix <- function(df.true, df.pred, title = "", true.lab ="True Class", pr
     coord_fixed()
   
 } 
+
+# Create confusion matrix and plot it via conf_matrix()
+confusion <- data.frame(true = test_traffic$type_of_traffic,
+                     predicted = traffic.knn)
+X11()
+conf_matrix(confusion$true, confusion$predicted, title = "Conf. Matrix Example")
+
