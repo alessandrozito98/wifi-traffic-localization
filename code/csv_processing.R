@@ -1,6 +1,8 @@
-setwd("~/Documents/GitHub/wifi-traffic-localization/data/raw_csv")
+setwd("path/to/folder") # Insert folder path
 
-traffic <- read.csv("videocall.csv", stringsAsFactors = T)
+file_name <- "file_name.csv" #Insert name of the file to process
+
+traffic <- read.csv(file_name, stringsAsFactors = T)
 # Filter non-802.11 packets
 traffic <- subset(traffic, traffic$Protocol == "802.11") 
 
@@ -70,7 +72,6 @@ for(i in 1:traffic_rows) {
   start_interval <- start_interval + interval
 }
 
-write.csv(dataset, "processed/processed_videocall.csv", row.names = FALSE)
+processed_filename <- "processed/processed_filename.csv" #Insert name of processed file
 
-
-
+write.csv(dataset, processed_filename, row.names = FALSE)
