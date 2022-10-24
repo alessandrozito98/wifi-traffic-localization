@@ -1,6 +1,6 @@
 # Wi-Fi Traffic Localization
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL3.0](https://img.shields.io/badge/License-GPL-brightgreen.svg)](https://choosealicense.com/licenses/gpl-3.0/)
 <!--[![CodeFactor](https://www.codefactor.io/repository/github/alessandrozito98/simulatoresistemielettorali-2/badge)](https://www.codefactor.io/repository/github/alessandrozito98/simulatoresistemielettorali-2)-->
 <!--- 
 [![wakatime](https://wakatime.com/badge/github/alessandrozito98/SimulatoreSistemiElettorali-2.svg)](https://wakatime.com/badge/github/alessandrozito98/SimulatoreSistemiElettorali-2) 
