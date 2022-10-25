@@ -28,7 +28,7 @@ change ```/path/to/folder``` with your local path.
 
 Alessandro Zito ([@alessandrozito98](https://github.com/alessandrozito98))
 
-Carlos Alberto Santillan Moreno ([@Plinkett](https://github.com/Plinkett))
+Carlos Alberto Santillán Moreno ([@Plinkett](https://github.com/Plinkett))
 
 
 ### Contributing
