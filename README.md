@@ -24,6 +24,8 @@ Needs R.
 
 change ```/path/to/folder``` with your local path.
 
+For more infos, please read the [report](https://github.com/alessandrozito98/wifi-traffic-localization/blob/master/report.pdf).
+
 ## Credits
 
 Alessandro Zito ([@alessandrozito98](https://github.com/alessandrozito98))
