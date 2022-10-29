@@ -14,7 +14,7 @@
 
 ## Description
 
-Pipeline for extracting and classifying encrypting WiFi traffic. Classification is based on statistical features of the traffic.
+Pipeline for extracting and classifying encrypted WiFi traffic. Classification is based on statistical features of the traffic.
 
 ## Installation and Configuration
 
