@@ -14,7 +14,7 @@
 
 ## Description
 
-Simulations of different electoral laws with the same dataset to see if there would be any changes in the composition of the parliament.
+Pipeline for extracting and classificating encrypting WiFi traffic. Classification is based on statistical features of the traffic.
 
 ## Installation and Configuration
 
